@@ -1,4 +1,4 @@
-// BCN — simple service worker: cache the app shell so it opens fast and works offline.
+// বরাটি কেবল নেটওয়ার্ক — simple service worker: cache the app shell so it opens fast and works offline.
 // Firestore data itself is cached by Firebase's offline persistence, not by this worker.
 // v2: পাতা (index.html) সবসময় নেট থেকে নতুন নেওয়া হয় — নেট না থাকলে ক্যাশ থেকে খোলে।
 // তাই নতুন আপডেট ফোনে আটকে থাকবে না।

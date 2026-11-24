@@ -78,8 +78,7 @@ function LoginScreen() {
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-6">
-        <h1 className="text-4xl font-bold text-center">BCN</h1>
-        <p className="text-center text-[var(--dim)] mt-1">বরাটি কেবল নেটওয়ার্ক</p>
+        <h1 className="text-2xl font-bold text-center">বরাটি কেবল নেটওয়ার্ক</h1>
         <p className="text-center font-semibold mt-4">মালিকের লগইন</p>
         <p className="text-sm text-[var(--dim)] text-center mt-1">
           শুধু মালিক ঢুকতে পারবে — ইমেইল আর পাসওয়ার্ড দিয়ে লগইন করুন।
@@ -229,8 +228,8 @@ export function App() {
         <div className="px-4 py-3 max-w-3xl mx-auto">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h1 className="text-4xl font-bold leading-tight">BCN</h1>
-              <p className="text-sm text-[var(--dim)]">বরাটি কেবল নেটওয়ার্ক • শুধু ওয়াইফাই কাস্টমার • সবার বিল মাসে {bnMoney(MONTHLY_FEE)} • কার্ড লাইন দেওয়ার তারিখ থেকে ১২ মাস</p>
+              <h1 className="text-2xl font-bold leading-tight">বরাটি কেবল নেটওয়ার্ক</h1>
+              <p className="text-sm text-[var(--dim)]">শুধু ওয়াইফাই কাস্টমার • সবার বিল মাসে {bnMoney(MONTHLY_FEE)} • কার্ড লাইন দেওয়ার তারিখ থেকে ১২ মাস</p>
             </div>
             <button
               onClick={() => void signOut(auth)}
