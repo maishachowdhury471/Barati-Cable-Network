@@ -26,6 +26,8 @@ export interface Customer {
   name: string;
   mobile: string;
   address: string;
+  gram: string;
+  para: string;
   packageName: string;
   connectionDate: string; // লাইন দেওয়ার তারিখ — ১২ মাসের কার্ড এখান থেকে শুরু
   lineStatus: "on" | "off";
@@ -57,6 +59,8 @@ export interface CustomerInput {
   name: string;
   mobile: string;
   address: string;
+  gram: string;
+  para: string;
   packageName: string;
   connectionDate: string;
   routerBrand: string;
@@ -80,6 +84,8 @@ function toCustomer(id: string, data: Record<string, unknown>): Customer {
     name: s(data.name),
     mobile: s(data.mobile),
     address: s(data.address),
+    gram: s(data.gram),
+    para: s(data.para),
     packageName: s(data.packageName),
     connectionDate: s(data.connectionDate),
     lineStatus: data.lineStatus === "off" ? "off" : "on",

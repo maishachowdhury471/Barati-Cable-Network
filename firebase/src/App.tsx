@@ -427,7 +427,11 @@ function CustomersTab({ views, onOpenCustomer, onAdd }: {
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [gramFilter, setGramFilter] = useState("");
+  const [paraFilter, setParaFilter] = useState("");
   const filters: [Filter, string][] = [["all", "সবাই"], ["due", "বিল বাকি"], ["paid", "বিল দিয়েছে"], ["on", "লাইন চালু"], ["off", "লাইন বন্ধ"]];
+  const grams = useMemo(() => [...new Set(views.map((c) => c.gram).filter(Boolean))].sort((a, b) => a.localeCompare(b, "bn")), [views]);
+  const paras = useMemo(() => [...new Set(views.map((c) => c.para).filter(Boolean))].sort((a, b) => a.localeCompare(b, "bn")), [views]);
 
   const list = useMemo(() => {
     let out = views;
@@ -437,6 +441,8 @@ function CustomersTab({ views, onOpenCustomer, onAdd }: {
         c.name.toLowerCase().includes(q) ||
         c.mobile.includes(q) ||
         c.address.toLowerCase().includes(q) ||
+        c.gram.toLowerCase().includes(q) ||
+        c.para.toLowerCase().includes(q) ||
         c.wifiName.toLowerCase().includes(q),
       );
     }
@@ -444,20 +450,38 @@ function CustomersTab({ views, onOpenCustomer, onAdd }: {
     if (filter === "off") out = out.filter((c) => c.lineStatus === "off");
     if (filter === "paid") out = out.filter((c) => c.paidCurrentCycle);
     if (filter === "due") out = out.filter((c) => c.currentCycle >= 1 && c.currentCycle <= 12 && !c.paidCurrentCycle);
+    if (gramFilter) out = out.filter((c) => c.gram === gramFilter);
+    if (paraFilter) out = out.filter((c) => c.para === paraFilter);
     return out;
-  }, [views, search, filter]);
+  }, [views, search, filter, gramFilter, paraFilter]);
 
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
         <label className="sr-only" htmlFor="cust-search">কাস্টমার খুঁজুন</label>
-        <input id="cust-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="নাম বা মোবাইল দিয়ে খুঁজুন…" className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-base" />
+        <input id="cust-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="নাম, মোবাইল, গ্রাম বা পাড়া দিয়ে খুঁজুন…" className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-base" />
         <button onClick={onAdd} aria-label="নতুন কাস্টমার যোগ করুন" className="rounded-xl bg-[var(--accent)] text-white font-bold px-4 py-3 shrink-0">+ নতুন</button>
       </div>
       <div className="flex gap-2 flex-wrap" role="group" aria-label="ফিল্টার">
         {filters.map(([key, label]) => (
           <button key={key} onClick={() => setFilter(key)} aria-label={`ফিল্টার: ${label}`} aria-pressed={filter === key} className={`rounded-full px-4 py-2 font-semibold border ${filter === key ? "bg-[var(--accent)] text-white border-transparent" : "bg-[var(--surface)] border-[var(--border)]"}`}>{label}</button>
         ))}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="sr-only" htmlFor="gram-filter">গ্রাম দিয়ে খুঁজুন</label>
+          <select id="gram-filter" value={gramFilter} onChange={(e) => setGramFilter(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-base font-semibold">
+            <option value="">সব গ্রাম</option>
+            {grams.map((g) => (<option key={g} value={g}>{g}</option>))}
+          </select>
+        </div>
+        <div>
+          <label className="sr-only" htmlFor="para-filter">পাড়া দিয়ে খুঁজুন</label>
+          <select id="para-filter" value={paraFilter} onChange={(e) => setParaFilter(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-base font-semibold">
+            <option value="">সব পাড়া</option>
+            {paras.map((pa) => (<option key={pa} value={pa}>{pa}</option>))}
+          </select>
+        </div>
       </div>
       {list.length === 0 && (
         <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-6 text-center">
@@ -473,6 +497,7 @@ function CustomersTab({ views, onOpenCustomer, onAdd }: {
                 <span>
                   <span className="block font-bold text-lg leading-tight">{c.name}</span>
                   <span className="block text-sm text-[var(--dim)] mt-0.5">📱 {bnNum(c.mobile)}{c.address ? ` • ${c.address}` : ""}</span>
+                  {(c.gram || c.para) && (<span className="block text-sm text-[var(--dim)] mt-0.5">📍 {[c.gram ? `গ্রাম: ${c.gram}` : "", c.para ? `পাড়া: ${c.para}` : ""].filter(Boolean).join(" • ")}</span>)}
                   <span className="block text-sm mt-1">
                     লাইন দেওয়া: {bnDate(c.connectionDate)} • {c.currentCycle >= 1 && c.currentCycle <= 12 ? `${cycleLabel(c.currentCycle)} চলছে (${bnDateShort(c.currentPeriodStart)} – ${bnDateShort(c.currentPeriodEnd)})` : c.currentCycle === 0 ? "লাইন এখনো শুরু হয়নি" : "১২ মাসের কার্ড শেষ"}
                   </span>
@@ -672,6 +697,7 @@ function CustomerCardPage({ customer, payments, today, onBack, onEdit }: {
                 <div>
                   <p className="text-2xl font-bold leading-tight">{c.name}</p>
                   <p className="text-[var(--dim)] mt-1">📱 {bnNum(c.mobile)}{c.address ? ` • ${c.address}` : ""}</p>
+                  {(c.gram || c.para) && (<p className="text-[var(--dim)] mt-1">📍 {[c.gram ? `গ্রাম: ${c.gram}` : "", c.para ? `পাড়া: ${c.para}` : ""].filter(Boolean).join(" • ")}</p>)}
                   <p className="mt-1">লাইন দেওয়া: <strong>{bnDate(c.connectionDate)}</strong> • মাসিক বিল: <strong>{bnMoney(MONTHLY_FEE)}</strong></p>
                   <p className="text-sm text-[var(--dim)] mt-1">
                     {currentCycle >= 1 && currentCycle <= 12
@@ -781,6 +807,8 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
   const [name, setName] = useState(initial?.name ?? "");
   const [mobile, setMobile] = useState(initial?.mobile ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
+  const [gram, setGram] = useState(initial?.gram ?? "");
+  const [para, setPara] = useState(initial?.para ?? "");
   const [packageName, setPackageName] = useState(initial?.packageName ?? "");
   const [connectionDate, setConnectionDate] = useState(initial?.connectionDate ?? today);
   const [routerBrand, setRouterBrand] = useState(initial?.routerBrand ?? "");
@@ -799,11 +827,13 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
     if (!name.trim()) { setError("কাস্টমারের নাম লিখুন"); return; }
     if (mobile.trim().length < 6) { setError("সঠিক মোবাইল নম্বর লিখুন"); return; }
     if (!address.trim()) { setError("ঠিকানা লিখুন"); return; }
+    if (!gram.trim()) { setError("গ্রামের নাম লিখুন"); return; }
+    if (!para.trim()) { setError("পাড়ার নাম লিখুন"); return; }
     if (!connectionDate) { setError("লাইন দেওয়ার তারিখ দিন — কার্ড এই তারিখ থেকে শুরু হবে"); return; }
     setError("");
     setBusy(true);
     const payload: CustomerInput = {
-      name: name.trim(), mobile: mobile.trim(), address: address.trim(), packageName: packageName.trim(),
+      name: name.trim(), mobile: mobile.trim(), address: address.trim(), gram: gram.trim(), para: para.trim(), packageName: packageName.trim(),
       connectionDate: connectionDate || today,
       routerBrand: routerBrand.trim(), routerModel: routerModel.trim(), routerIp: routerIp.trim(),
       wifiName: wifiName.trim(), wifiPassword: wifiPassword.trim(), pppoeUser: pppoeUser.trim(),
@@ -844,8 +874,18 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
               <input id="f-mobile" value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="tel" placeholder="01XXXXXXXXX" className={inputCls} />
             </div>
             <div>
-              <label htmlFor="f-address" className="font-semibold block mb-1">ঠিকানা / পাড়া *</label>
-              <input id="f-address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="বাড়ি, পাড়া, গ্রাম" className={inputCls} />
+              <label htmlFor="f-address" className="font-semibold block mb-1">ঠিকানা *</label>
+              <input id="f-address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="বাড়ি / রাস্তা" className={inputCls} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="f-gram" className="font-semibold block mb-1">গ্রাম *</label>
+                <input id="f-gram" value={gram} onChange={(e) => setGram(e.target.value)} placeholder="গ্রামের নাম" className={inputCls} />
+              </div>
+              <div>
+                <label htmlFor="f-para" className="font-semibold block mb-1">পাড়া *</label>
+                <input id="f-para" value={para} onChange={(e) => setPara(e.target.value)} placeholder="পাড়ার নাম" className={inputCls} />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
