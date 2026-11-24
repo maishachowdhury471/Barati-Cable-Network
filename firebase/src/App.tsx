@@ -248,8 +248,8 @@ export function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-1.5 rounded-full bg-[var(--border)] mx-auto" />
-            <p className="text-xl font-bold text-center mt-5">আপনি কি নিশ্চিত আপনি বের হতে চান?</p>
-            <p className="text-base text-[var(--dim)] text-center mt-3">অ্যাপটি বন্ধ হয়ে যাবে — লগইন থাকবে, আবার খুললে সরাসরি ঢুকতে পারবেন।</p>
+            <p className="text-xl font-bold text-center mt-5">আপনি কি নিশ্চিত আপনি ফিরে যেতে চান?</p>
+            <p className="text-base text-[var(--dim)] text-center mt-3">অ্যাপ্লিকেশনটি বন্ধ হয়ে যাবে</p>
             <div className="flex items-center justify-between gap-3 mt-7">
               <button
                 onClick={() => setConfirmExit(false)}
