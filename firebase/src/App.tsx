@@ -80,9 +80,6 @@ function LoginScreen() {
       <div className="w-full max-w-sm rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-6">
         <h1 className="text-2xl font-bold text-center">বরাটি কেবল নেটওয়ার্ক</h1>
         <p className="text-center font-semibold mt-4">মালিকের লগইন</p>
-        <p className="text-sm text-[var(--dim)] text-center mt-1">
-          শুধু মালিক ঢুকতে পারবে — ইমেইল আর পাসওয়ার্ড দিয়ে লগইন করুন।
-        </p>
         <div className="space-y-3 mt-5">
           <div>
             <label htmlFor="login-email" className="font-semibold block mb-1">ইমেইল</label>
@@ -121,9 +118,6 @@ function LoginScreen() {
           >
             {busy ? "ঢুকছি…" : "লগইন করুন"}
           </button>
-          <p className="text-xs text-[var(--dim)] text-center">
-            প্রথম লগইন Firebase Console-এ বানাতে হয় — README দেখুন।
-          </p>
         </div>
       </div>
     </div>
