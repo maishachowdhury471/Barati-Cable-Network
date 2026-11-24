@@ -78,7 +78,7 @@ export function App() {
       <header className="sticky top-0 z-20 bg-[var(--bg)]/95 backdrop-blur border-b border-[var(--border)] pt-safe">
         <div className="px-4 py-3 max-w-3xl mx-auto">
           <h1 className="text-xl font-bold leading-tight">BCN</h1>
-          <p className="text-sm text-[var(--dim)]">বারাটি কেবল নেটওয়ার্ক • শুধু ওয়াইফাই কাস্টমার • সবার বিল মাসে {bnMoney(500)} • কার্ড লাইন দেওয়ার তারিখ থেকে ১২ মাস</p>
+          <p className="text-sm text-[var(--dim)]">বরাটি কেবল নেটওয়ার্ক • শুধু ওয়াইফাই কাস্টমার • সবার বিল মাসে {bnMoney(500)} • কার্ড লাইন দেওয়ার তারিখ থেকে ১২ মাস</p>
         </div>
       </header>
 
@@ -518,6 +518,7 @@ function CustomerForm({ initial, today, onClose, onSaved }: { initial: CustomerL
   function submit() {
     if (!name.trim()) { setError("কাস্টমারের নাম লিখুন"); return; }
     if (mobile.trim().length < 6) { setError("সঠিক মোবাইল নম্বর লিখুন"); return; }
+    if (!address.trim()) { setError("ঠিকানা লিখুন"); return; }
     if (!connectionDate) { setError("লাইন দেওয়ার তারিখ দিন — কার্ড এই তারিখ থেকে শুরু হবে"); return; }
     setError("");
     save.mutate();
@@ -543,7 +544,7 @@ function CustomerForm({ initial, today, onClose, onSaved }: { initial: CustomerL
               <input id="f-mobile" {...FIELDS.addCustomer.mobile} value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="tel" placeholder="01XXXXXXXXX" className={inputCls} />
             </div>
             <div>
-              <label htmlFor="f-address" className="font-semibold block mb-1">ঠিকানা / পাড়া</label>
+              <label htmlFor="f-address" className="font-semibold block mb-1">ঠিকানা / পাড়া *</label>
               <input id="f-address" {...FIELDS.addCustomer.address} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="বাড়ি, পাড়া, গ্রাম" className={inputCls} />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -553,7 +554,7 @@ function CustomerForm({ initial, today, onClose, onSaved }: { initial: CustomerL
                 <p className="text-xs text-[var(--dim)] mt-1">১২ মাসের কার্ড এই তারিখ থেকেই শুরু হবে।</p>
               </div>
               <div>
-                <label htmlFor="f-fee" className="font-semibold block mb-1">মাসিক বিল</label>
+                <label htmlFor="f-fee" className="font-semibold block mb-1">মাসিক বিল *</label>
                 <input id="f-fee" value="৫০০ টাকা" disabled aria-label="মাসিক বিল ৫০০ টাকা, সবার জন্য একই" className={`${inputCls} opacity-70`} />
                 <p className="text-xs text-[var(--dim)] mt-1">সবার জন্য একই — ৫০০ টাকা।</p>
               </div>

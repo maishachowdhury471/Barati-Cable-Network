@@ -79,7 +79,7 @@ function LoginScreen() {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-6">
         <h1 className="text-4xl font-bold text-center">BCN</h1>
-        <p className="text-center text-[var(--dim)] mt-1">বারাটি কেবল নেটওয়ার্ক</p>
+        <p className="text-center text-[var(--dim)] mt-1">বরাটি কেবল নেটওয়ার্ক</p>
         <p className="text-center font-semibold mt-4">মালিকের লগইন</p>
         <p className="text-sm text-[var(--dim)] text-center mt-1">
           শুধু মালিক ঢুকতে পারবে — ইমেইল আর পাসওয়ার্ড দিয়ে লগইন করুন।
@@ -142,6 +142,7 @@ export function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Customer | null>(null);
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const today = useMemo(() => todayStr(), []);
 
   useEffect(() => onAuthStateChanged(auth, (u) => { setUser(u); setAuthReady(true); }), []);
@@ -206,10 +207,10 @@ export function App() {
           <div className="flex items-start justify-between gap-2">
             <div>
               <h1 className="text-4xl font-bold leading-tight">BCN</h1>
-              <p className="text-sm text-[var(--dim)]">বারাটি কেবল নেটওয়ার্ক • শুধু ওয়াইফাই কাস্টমার • সবার বিল মাসে {bnMoney(MONTHLY_FEE)} • কার্ড লাইন দেওয়ার তারিখ থেকে ১২ মাস</p>
+              <p className="text-sm text-[var(--dim)]">বরাটি কেবল নেটওয়ার্ক • শুধু ওয়াইফাই কাস্টমার • সবার বিল মাসে {bnMoney(MONTHLY_FEE)} • কার্ড লাইন দেওয়ার তারিখ থেকে ১২ মাস</p>
             </div>
             <button
-              onClick={() => void signOut(auth)}
+              onClick={() => setConfirmLogout(true)}
               aria-label="লগআউট করুন"
               className="rounded-full bg-[var(--surface)] border border-[var(--border)] px-3 py-2 text-sm font-semibold shrink-0"
             >
@@ -218,6 +219,31 @@ export function App() {
           </div>
         </div>
       </header>
+
+      {confirmLogout && (
+        <div className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="বের হওয়ার নিশ্চিতকরণ">
+          <div className="w-full max-w-sm rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-6 text-center">
+            <p className="text-xl font-bold">আপনি কি বের হতে চান?</p>
+            <p className="text-sm text-[var(--dim)] mt-2">নিশ্চিত হলে বের হয়ে যাবেন, আবার ঢুকতে লগইন করতে হবে।</p>
+            <div className="flex gap-3 mt-5">
+              <button
+                onClick={() => { setConfirmLogout(false); void signOut(auth); }}
+                aria-label="হ্যাঁ, বের হবো"
+                className="flex-1 rounded-xl bg-[#dc2626] text-white font-bold py-3"
+              >
+                হ্যাঁ, বের হবো
+              </button>
+              <button
+                onClick={() => setConfirmLogout(false)}
+                aria-label="না, থাকবো"
+                className="flex-1 rounded-xl bg-[var(--surface2)] font-bold py-3"
+              >
+                না, থাকবো
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="px-4 max-w-3xl mx-auto pt-4">
         {!dataReady && <p className="text-[var(--dim)] py-6 text-center">লোড হচ্ছে…</p>}
@@ -736,6 +762,7 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
   async function submit() {
     if (!name.trim()) { setError("কাস্টমারের নাম লিখুন"); return; }
     if (mobile.trim().length < 6) { setError("সঠিক মোবাইল নম্বর লিখুন"); return; }
+    if (!address.trim()) { setError("ঠিকানা লিখুন"); return; }
     if (!connectionDate) { setError("লাইন দেওয়ার তারিখ দিন — কার্ড এই তারিখ থেকে শুরু হবে"); return; }
     setError("");
     setBusy(true);
@@ -781,7 +808,7 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
               <input id="f-mobile" value={mobile} onChange={(e) => setMobile(e.target.value)} inputMode="tel" placeholder="01XXXXXXXXX" className={inputCls} />
             </div>
             <div>
-              <label htmlFor="f-address" className="font-semibold block mb-1">ঠিকানা / পাড়া</label>
+              <label htmlFor="f-address" className="font-semibold block mb-1">ঠিকানা / পাড়া *</label>
               <input id="f-address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="বাড়ি, পাড়া, গ্রাম" className={inputCls} />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -791,7 +818,7 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
                 <p className="text-xs text-[var(--dim)] mt-1">১২ মাসের কার্ড এই তারিখ থেকেই শুরু হবে।</p>
               </div>
               <div>
-                <label htmlFor="f-fee" className="font-semibold block mb-1">মাসিক বিল</label>
+                <label htmlFor="f-fee" className="font-semibold block mb-1">মাসিক বিল *</label>
                 <input id="f-fee" value="৫০০ টাকা" disabled aria-label="মাসিক বিল ৫০০ টাকা, সবার জন্য একই" className={`${inputCls} opacity-70`} />
                 <p className="text-xs text-[var(--dim)] mt-1">সবার জন্য একই — ৫০০ টাকা।</p>
               </div>
