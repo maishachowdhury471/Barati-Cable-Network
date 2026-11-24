@@ -35,6 +35,12 @@ function todayStr(): string {
 }
 const ORDINALS = ["১ম","২য়","৩য়","৪র্থ","৫ম","৬ষ্ঠ","৭ম","৮ম","৯ম","১০ম","১১তম","১২তম"];
 function cycleLabel(idx: number): string { return `${ORDINALS[idx - 1] ?? bnNum(idx)} মাস`; }
+function routerUrl(ip: string | null | undefined): string | null {
+  const clean = (ip ?? "").trim();
+  if (!clean) return null;
+  if (/^https?:\/\//i.test(clean)) return clean;
+  return `http://${clean}`;
+}
 
 type Tab = "home" | "customers" | "khata" | "routers";
 type Filter = "all" | "on" | "off" | "paid" | "due";
@@ -331,7 +337,12 @@ function RoutersTab({ onOpenCustomer }: { onOpenCustomer: (id: number) => void }
                 {c.onuInfo ? ` • ONU: ${c.onuInfo}` : ""}
               </span>
             </button>
-            <div className="flex justify-end mt-3 pt-3 border-t border-[var(--border)]">
+            <div className="flex items-center justify-between gap-2 mt-3 pt-3 border-t border-[var(--border)]">
+              {routerUrl(c.routerIp) ? (
+                <a href={routerUrl(c.routerIp) ?? undefined} target="_blank" rel="noreferrer" aria-label={`${c.name} এর রাউটারে ঢুকুন`} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">🔧 রাউটারে ঢুকুন</a>
+              ) : (
+                <span className="text-sm text-[var(--dim)]">রাউটার IP দেওয়া হয়নি</span>
+              )}
               <LineToggle status={c.lineStatus} customerId={c.id} />
             </div>
           </article>
@@ -397,6 +408,12 @@ function CustomerCardPage({ customerId, today, onBack, onEdit }: { customerId: n
                   {c.routerIp && <p>রাউটার IP: {c.routerIp}</p>}
                   {c.pppoeUser && <p>PPPoE ইউজার: {c.pppoeUser}{c.pppoePass ? ` • পাসওয়ার্ড: ${c.pppoePass}` : ""}</p>}
                   {c.onuInfo && <p>ONU: {c.onuInfo}</p>}
+                  {routerUrl(c.routerIp) && (
+                    <p className="pt-2">
+                      <a href={routerUrl(c.routerIp) ?? undefined} target="_blank" rel="noreferrer" aria-label="রাউটারে ঢুকুন" className="inline-block rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">🔧 রাউটারে ঢুকুন — IP লিখতে হবে না</a>
+                      <span className="block text-xs text-[var(--dim)] mt-1">শুধু ওই বাড়ির ওয়াইফাইয়ে যুক্ত থাকলে খুলবে।</span>
+                    </p>
+                  )}
                   {c.notes && <p className="text-[var(--dim)]">নোট: {c.notes}</p>}
                 </div>
               )}
