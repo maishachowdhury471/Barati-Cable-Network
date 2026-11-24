@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, type User } from "firebase/auth";
 import { auth } from "./lib/firebase";
 import {
@@ -143,7 +143,8 @@ export function App() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Customer | null>(null);
   const [confirmExit, setConfirmExit] = useState(false);
-  const [exited, setExited] = useState(false);
+  const disarmExitTrap = useRef(false);
+  const exitTrapPushed = useRef(false);
   const today = useMemo(() => todayStr(), []);
 
   useEffect(() => onAuthStateChanged(auth, (u) => { setUser(u); setAuthReady(true); }), []);
@@ -151,10 +152,11 @@ export function App() {
   // ব্যাক বোতাম / ব্যাক সোয়াইপ: কার্ড খোলা থাকলে কার্ড বন্ধ হবে, ফর্ম খোলা থাকলে ফর্ম বন্ধ হবে,
   // মূল পর্দায় থাকলে বের হওয়ার শিট আসবে। লগইন থাকবে — বের হলেও আবার লগইন করতে হবে না।
   useEffect(() => {
-    if (!user || exited) return;
+    if (!user) return;
     const push = () => { try { history.pushState({ bcnExit: true }, ""); } catch { /* কিছু করার নেই */ } };
-    push();
+    if (!exitTrapPushed.current) { exitTrapPushed.current = true; push(); }
     const onPop = () => {
+      if (disarmExitTrap.current) return;
       if (confirmExit) { setConfirmExit(false); push(); return; }
       if (showForm) { setShowForm(false); setEditing(null); push(); return; }
       if (selectedId != null) { setSelectedId(null); push(); return; }
@@ -163,7 +165,7 @@ export function App() {
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [user, exited, confirmExit, showForm, selectedId]);
+  }, [user, confirmExit, showForm, selectedId]);
 
   // পড়া কম রাখতে: লগইনের পর কাস্টমার আর পেমেন্ট একবারই subscribe —
   // এরপর সব ট্যাব এই লোকাল ডেটা থেকেই হিসাব করবে, প্রত্যেক ক্লিকে নতুন করে পড়া হবে না।
@@ -195,18 +197,6 @@ export function App() {
   }
   if (!user) return <LoginScreen />;
 
-  if (exited) {
-    return (
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex flex-col items-center justify-center px-6 text-center">
-        <h1 className="text-4xl font-bold">BCN</h1>
-        <p className="text-[var(--dim)] mt-2">অ্যাপটি বন্ধ হয়েছে</p>
-        <p className="text-sm text-[var(--dim)] mt-1">লগইন আছে — আবার খুললে সরাসরি ঢুকতে পারবেন।</p>
-        <button onClick={() => window.location.reload()} aria-label="আবার ঢুকুন" className="mt-6 rounded-full bg-[var(--accent)] text-white font-bold px-8 py-3 text-lg">
-          আবার ঢুকুন
-        </button>
-      </div>
-    );
-  }
 
   if (selectedId != null) {
     const selected = views.find((v) => v.id === selectedId);
@@ -269,7 +259,13 @@ export function App() {
                 বাতিল করুন
               </button>
               <button
-                onClick={() => { setConfirmExit(false); try { window.close(); } catch { /* কিছু করার নেই */ } setExited(true); }}
+                onClick={() => {
+                  setConfirmExit(false);
+                  disarmExitTrap.current = true;
+                  try { window.close(); } catch { /* কিছু করার নেই */ }
+                  // লঞ্চ এন্ট্রিরও পেছনে গেলে অ্যাপ বন্ধ হয়ে যাবে
+                  try { history.go(-2); } catch { /* কিছু করার নেই */ }
+                }}
                 aria-label="নিশ্চিত"
                 className="rounded-full bg-[#dc2626] text-white font-bold px-10 py-3 text-lg"
               >
