@@ -160,12 +160,14 @@ export function App() {
       if (confirmExit) { setConfirmExit(false); push(); return; }
       if (showForm) { setShowForm(false); setEditing(null); push(); return; }
       if (selectedId != null) { setSelectedId(null); push(); return; }
+      // ভেতরের ট্যাবে থাকলে প্রথমে হোম ট্যাবে যাও — শুধু হোমে থাকলেই বের হওয়ার শিট আসবে
+      if (tab !== "home") { setTab("home"); push(); return; }
       setConfirmExit(true);
       push();
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [user, confirmExit, showForm, selectedId]);
+  }, [user, confirmExit, showForm, selectedId, tab]);
 
   // পড়া কম রাখতে: লগইনের পর কাস্টমার আর পেমেন্ট একবারই subscribe —
   // এরপর সব ট্যাব এই লোকাল ডেটা থেকেই হিসাব করবে, প্রত্যেক ক্লিকে নতুন করে পড়া হবে না।
