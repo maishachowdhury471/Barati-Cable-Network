@@ -137,7 +137,7 @@ function LineToggle({ status, customerId, large }: { status: "on" | "off"; custo
     <button
       onClick={(e) => { e.stopPropagation(); mut.mutate(isOn ? "off" : "on"); }}
       aria-label={isOn ? "লাইন বন্ধ করুন" : "লাইন চালু করুন"}
-      className={`${large ? "px-5 py-3 text-lg" : "px-4 py-2 text-base"} rounded-full font-bold text-white shrink-0 ${isOn ? "bg-[#166534]" : "bg-[#dc2626]"}`}
+      className={`${large ? "px-5 py-3 text-lg" : "px-4 py-2 text-base"} rounded-full font-bold text-white shrink-0 ${isOn ? "bg-[#1d4ed8]" : "bg-[#dc2626]"}`}
     >
       {isOn ? "🟢 লাইন চালু" : "🔴 লাইন বন্ধ"}
     </button>
@@ -168,7 +168,7 @@ function HomeTab({ today, onOpenCustomer, onGoCustomers }: { today: string; onOp
           <p className="text-sm text-[var(--dim)] mt-1">মোট কাস্টমার</p>
         </div>
         <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-4 text-center">
-          <p className="text-3xl font-bold text-[#166534]">{dash.data ? bnNum(dash.data.lineOn) : "…"}</p>
+          <p className="text-3xl font-bold text-[#1d4ed8]">{dash.data ? bnNum(dash.data.lineOn) : "…"}</p>
           <p className="text-sm text-[var(--dim)] mt-1">লাইন চালু</p>
         </div>
         <div className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-4 text-center">
