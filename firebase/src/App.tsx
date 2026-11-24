@@ -221,24 +221,28 @@ export function App() {
       </header>
 
       {confirmLogout && (
-        <div className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="বের হওয়ার নিশ্চিতকরণ">
-          <div className="w-full max-w-sm rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-6 text-center">
-            <p className="text-xl font-bold">আপনি কি বের হতে চান?</p>
-            <p className="text-sm text-[var(--dim)] mt-2">নিশ্চিত হলে বের হয়ে যাবেন, আবার ঢুকতে লগইন করতে হবে।</p>
-            <div className="flex gap-3 mt-5">
-              <button
-                onClick={() => { setConfirmLogout(false); void signOut(auth); }}
-                aria-label="হ্যাঁ, বের হবো"
-                className="flex-1 rounded-xl bg-[#dc2626] text-white font-bold py-3"
-              >
-                হ্যাঁ, বের হবো
-              </button>
+        <div className="fixed inset-0 z-40 bg-black/50" role="dialog" aria-modal="true" aria-label="বের হওয়ার নিশ্চিতকরণ" onClick={() => setConfirmLogout(false)}>
+          <div
+            className="sheet-up absolute bottom-0 left-0 right-0 bg-[var(--surface)] rounded-t-3xl px-5 pt-3 pb-6 max-w-3xl mx-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-12 h-1.5 rounded-full bg-[var(--border)] mx-auto" />
+            <p className="text-xl font-bold text-center mt-5">আপনি কি নিশ্চিত আপনি বের হতে চান?</p>
+            <p className="text-base text-[var(--dim)] text-center mt-3">অ্যাপ থেকে বের হয়ে যাবেন — আবার ঢুকতে লগইন করতে হবে।</p>
+            <div className="flex items-center justify-between gap-3 mt-7">
               <button
                 onClick={() => setConfirmLogout(false)}
-                aria-label="না, থাকবো"
-                className="flex-1 rounded-xl bg-[var(--surface2)] font-bold py-3"
+                aria-label="বাতিল করুন"
+                className="px-4 py-3 text-lg font-semibold text-[var(--dim)]"
               >
-                না, থাকবো
+                বাতিল করুন
+              </button>
+              <button
+                onClick={() => { setConfirmLogout(false); void signOut(auth); }}
+                aria-label="নিশ্চিত"
+                className="rounded-full bg-[#dc2626] text-white font-bold px-10 py-3 text-lg"
+              >
+                নিশ্চিত
               </button>
             </div>
           </div>
