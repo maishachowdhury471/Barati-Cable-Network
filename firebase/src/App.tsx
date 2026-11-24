@@ -79,7 +79,6 @@ function LoginScreen() {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] flex items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-3xl bg-[var(--surface)] border border-[var(--border)] p-6">
         <h1 className="text-2xl font-bold text-center">বরাটি কেবল নেটওয়ার্ক</h1>
-        <p className="text-center font-semibold mt-4">মালিকের লগইন</p>
         <div className="space-y-3 mt-5">
           <div>
             <label htmlFor="login-email" className="font-semibold block mb-1">ইমেইল</label>
