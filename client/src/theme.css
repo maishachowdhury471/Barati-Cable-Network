@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "tailwindcss-safe-area";
+
+@theme {
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  --text-lg: 18px;
+  --text-lg--line-height: 28px;
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 32px;
+  --text-3xl: 30px;
+  --text-3xl--line-height: 36px;
+  --text-4xl: 36px;
+  --text-4xl--line-height: 40px;
+  --font-sans: "Hind Siliguri", system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  --bg: #faf8f2;
+  --surface: #ffffff;
+  --surface2: #f0ece1;
+  --text: #1a2e1f;
+  --dim: #6b7a6e;
+  --border: #e2ddd0;
+  --accent: #166534;
+  --accent-light: #dcfce7;
+  --amber: #d97706;
+  --amber-light: #fef3c7;
+  --red: #dc2626;
+  --red-light: #fee2e2;
+  --radius: 16px;
+  --space-surface: var(--surface);
+  --space-surface-alt: var(--surface2);
+  --space-muted: var(--dim);
+  --space-border: var(--border);
+  --space-accent: var(--accent);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #121a13;
+    --surface: #1c2a1e;
+    --surface2: #243528;
+    --text: #eef5ee;
+    --dim: #9ab09e;
+    --border: #2f4533;
+    --accent: #4ade80;
+    --accent-light: #14532d;
+    --amber: #fbbf24;
+    --amber-light: #451a03;
+    --red: #f87171;
+    --red-light: #450a0a;
+  }
+}
+@layer base {
+  html { font-family: var(--font-sans); }
+  body { font-family: var(--font-sans); }
+  button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.75rem; }
+  input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
+}
+.bn { font-family: "Hind Siliguri", system-ui, sans-serif; }
