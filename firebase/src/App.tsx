@@ -262,17 +262,13 @@ export function App() {
                 onClick={() => {
                   setConfirmExit(false);
                   disarmExitTrap.current = true;
+                  // সব একই ট্যাপের ভিতরে করতে হবে — দেরি করলে ফোন শোনে না
                   // ১) অ্যাপের উইন্ডো বন্ধ করার চেষ্টা
                   try { window.close(); } catch { /* কিছু করার নেই */ }
                   // ২) হিস্ট্রির গার্ড এন্ট্রিটা সরিয়ে দাও
                   try { history.back(); } catch { /* কিছু করার নেই */ }
-                  // ৩) তাও খোলা থাকলে হোম স্ক্রিনে নিয়ে যাও
-                  setTimeout(() => {
-                    if (document.visibilityState === "visible") {
-                      try { window.close(); } catch { /* কিছু করার নেই */ }
-                      window.location.href = "intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;end";
-                    }
-                  }, 300);
+                  // ৩) সাথে সাথেই হোম স্ক্রিনে নিয়ে যাও
+                  window.location.href = "intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;end";
                 }}
                 aria-label="নিশ্চিত"
                 className="rounded-full bg-[#dc2626] text-white font-bold px-10 py-3 text-lg"
