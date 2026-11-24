@@ -1,6 +1,8 @@
 // BCN — simple service worker: cache the app shell so it opens fast and works offline.
 // Firestore data itself is cached by Firebase's offline persistence, not by this worker.
-const CACHE = "bcn-v1";
+// v2: পাতা (index.html) সবসময় নেট থেকে নতুন নেওয়া হয় — নেট না থাকলে ক্যাশ থেকে খোলে।
+// তাই নতুন আপডেট ফোনে আটকে থাকবে না।
+const CACHE = "bcn-v2";
 const ASSETS = ["/", "/index.html", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -25,8 +27,24 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
-  // Only cache same-origin GET requests (app files). Never cache Firebase/Auth/Firestore calls.
+  // Only handle same-origin GET requests. Never cache Firebase/Auth/Firestore calls.
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
+
+  // পাতা (navigation): নেট থেকে নতুন নাও, না পেলে ক্যাশ থেকে খোলো
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((c) => c || caches.match("/index.html"))),
+    );
+    return;
+  }
+
+  // বাকি ফাইল (JS/CSS/আইকন): ক্যাশে থাকলে সেটা, না থাকলে নেট থেকে নিয়ে ক্যাশে রাখো
   event.respondWith(
     caches.match(event.request).then(
       (cached) =>
