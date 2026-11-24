@@ -24,7 +24,7 @@ export const customers = sqliteTable("customers", {
 export const payments = sqliteTable("payments", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   customerId: integer("customer_id").notNull(),
-  // 1..12 — লাইন দেওয়ার তারিখ থেকে গোনা মাস (ক্যালেন্ডার মাস না)
+  // 1..12 — লাইন দেওয়ার তারিখ থেকে গোনা ক্যালেন্ডার মাস
   cycleIndex: integer("cycle_index").notNull(),
   periodStart: text("period_start"), // YYYY-MM-DD
   periodEnd: text("period_end"), // YYYY-MM-DD

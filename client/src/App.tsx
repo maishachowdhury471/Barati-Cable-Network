@@ -410,7 +410,7 @@ function CustomerCardPage({ customerId, today, onBack, onEdit }: { customerId: n
                   <select id="pay-method" value={method} onChange={(e) => setMethod(e.target.value)} aria-label="টাকা নেওয়ার মাধ্যম" className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
                     <option value="নগদ">নগদ</option>
                     <option value="বিকাশ">বিকাশ</option>
-                    <option value="নগদ (ব্যাংক)">ব্যাংক</option>
+                    <option value="ব্যাংক">ব্যাংক</option>
                   </select>
                 </div>
               </div>
