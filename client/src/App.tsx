@@ -77,8 +77,8 @@ export function App() {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] pb-24">
       <header className="sticky top-0 z-20 bg-[var(--bg)]/95 backdrop-blur border-b border-[var(--border)] pt-safe">
         <div className="px-4 py-3 max-w-3xl mx-auto">
-          <h1 className="text-xl font-bold leading-tight">আব্বুর ওয়াইফাই ডিজিটাল খাতা</h1>
-          <p className="text-sm text-[var(--dim)]">শুধু ওয়াইফাই কাস্টমার • সবার বিল মাসে {bnMoney(500)} • কার্ড লাইন দেওয়ার তারিখ থেকে ১২ মাস</p>
+          <h1 className="text-xl font-bold leading-tight">BCN</h1>
+          <p className="text-sm text-[var(--dim)]">বারাটি কেবল নেটওয়ার্ক • শুধু ওয়াইফাই কাস্টমার • সবার বিল মাসে {bnMoney(500)} • কার্ড লাইন দেওয়ার তারিখ থেকে ১২ মাস</p>
         </div>
       </header>
 
