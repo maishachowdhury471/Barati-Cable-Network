@@ -26,7 +26,7 @@ import {
   todayStr,
 } from "./lib/bangla";
 
-type Tab = "home" | "customers" | "khata" | "routers" | "wifi";
+type Tab = "home" | "customers" | "khata" | "routers";
 type Filter = "all" | "on" | "off" | "paid" | "due";
 
 // ---------- একই হিসাব সব জায়গায় ----------
@@ -282,17 +282,15 @@ export function App() {
         )}
         {dataReady && tab === "khata" && <KhataTab views={views} payments={payments} onOpenCustomer={setSelectedId} />}
         {dataReady && tab === "routers" && <RoutersTab views={views} onOpenCustomer={setSelectedId} />}
-        {dataReady && tab === "wifi" && <MyWifiTab views={views} onOpenCustomer={setSelectedId} />}
       </main>
 
       <nav aria-label="প্রধান মেনু" className="fixed bottom-0 left-0 right-0 z-20 bg-[var(--surface)] border-t border-[var(--border)]">
-        <div className="max-w-3xl mx-auto grid grid-cols-5">
+        <div className="max-w-3xl mx-auto grid grid-cols-4">
           {([
             ["home", "🏠 হোম"],
             ["customers", "👥 কাস্টমার"],
             ["khata", "📒 খাতা"],
             ["routers", "📶 রাউটার"],
-            ["wifi", "📡 WiFi"],
           ] as [Tab, string][]).map(([key, label]) => (
             <button
               key={key}
@@ -336,180 +334,6 @@ function LineToggle({ status, customerId, large }: { status: "on" | "off"; custo
     >
       {isOn ? "🟢 লাইন চালু" : "🔴 লাইন বন্ধ"}
     </button>
-  );
-}
-
-function MyWifiTab({ views, onOpenCustomer }: {
-  views: CustomerView[];
-  onOpenCustomer: (id: string) => void;
-}) {
-  const [online, setOnline] = useState(navigator.onLine);
-  const [conn, setConn] = useState(() => {
-    const c = (navigator as Navigator & { connection?: { type?: string; effectiveType?: string; downlink?: number } }).connection;
-    return { type: c?.type ?? "", effectiveType: c?.effectiveType ?? "", downlink: c?.downlink ?? 0 };
-  });
-  useEffect(() => {
-    const update = () => {
-      setOnline(navigator.onLine);
-      const c = (navigator as Navigator & { connection?: { type?: string; effectiveType?: string; downlink?: number } }).connection;
-      setConn({ type: c?.type ?? "", effectiveType: c?.effectiveType ?? "", downlink: c?.downlink ?? 0 });
-    };
-    window.addEventListener("online", update);
-    window.addEventListener("offline", update);
-    const c = (navigator as Navigator & { connection?: { addEventListener?: (t: string, f: () => void) => void; removeEventListener?: (t: string, f: () => void) => void } }).connection;
-    c?.addEventListener?.("change", update);
-    return () => {
-      window.removeEventListener("online", update);
-      window.removeEventListener("offline", update);
-      c?.removeEventListener?.("change", update);
-    };
-  }, []);
-
-  const wifiList = useMemo(
-    () => views.filter((c) => c.wifiName.trim()).sort((a, b) => a.wifiName.localeCompare(b.wifiName, "bn")),
-    [views],
-  );
-  const [pickedId, setPickedId] = useState<string>(() => localStorage.getItem("bcn-my-wifi-id") ?? "");
-  const picked = wifiList.find((c) => c.id === pickedId) ?? null;
-  const [showPass, setShowPass] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [showAdminPass, setShowAdminPass] = useState(false);
-  const [copiedAdmin, setCopiedAdmin] = useState(false);
-
-  useEffect(() => {
-    if (pickedId && !wifiList.some((c) => c.id === pickedId)) setPickedId("");
-  }, [wifiList, pickedId]);
-
-  const pick = (id: string) => {
-    setPickedId(id);
-    setShowPass(false);
-    setCopied(false);
-    setShowAdminPass(false);
-    setCopiedAdmin(false);
-    if (id) localStorage.setItem("bcn-my-wifi-id", id);
-    else localStorage.removeItem("bcn-my-wifi-id");
-  };
-
-  const copyAdminPass = async () => {
-    if (!picked?.routerAdminPass) return;
-    try {
-      await navigator.clipboard.writeText(picked.routerAdminPass);
-      setCopiedAdmin(true);
-      setTimeout(() => setCopiedAdmin(false), 2000);
-    } catch { /* ক্লিপবোর্ড না থাকলে কিছু করার নেই */ }
-  };
-
-  const copyPass = async () => {
-    if (!picked?.wifiPassword) return;
-    try {
-      await navigator.clipboard.writeText(picked.wifiPassword);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* ক্লিপবোর্ড না থাকলে কিছু করার নেই */ }
-  };
-
-  const speedLabel = conn.effectiveType
-    ? ({ "slow-2g": "খুব ধীর", "2g": "২জি", "3g": "৩জি", "4g": "৪জি" } as Record<string, string>)[conn.effectiveType] ?? conn.effectiveType
-    : "";
-
-  return (
-    <div className="space-y-3">
-      <h2 className="text-xl font-bold">📡 আমার WiFi</h2>
-
-      <section className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-4" aria-label="ফোনের সংযোগ">
-        <p className="font-bold">ফোনের সংযোগ</p>
-        <p className="mt-1">
-          {online ? "🟢 অনলাইন" : "🔴 অফলাইন"}
-          {" • "}
-          {conn.type === "wifi" ? "WiFi-তে আছো" : conn.type === "cellular" ? "মোবাইল ডেটায় আছো" : conn.type ? `সংযোগ: ${conn.type}` : "সংযোগের ধরন জানা যায়নি"}
-          {speedLabel ? ` • গতি: ${speedLabel}` : ""}
-          {conn.downlink ? ` (${bnNum(conn.downlink)} Mbps)` : ""}
-        </p>
-        <p className="text-sm text-[var(--dim)] mt-1">
-          ফোন এখন কোন WiFi-তে আছে, সেটা অ্যাপ নিজে জানতে পারে না — ব্রাউজার সেই তথ্য দেয় না। তাই নিচে তোমার WiFi-টা বেছে নাও।
-        </p>
-      </section>
-
-      <section className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-4" aria-label="আমার WiFi বাছুন">
-        <label htmlFor="my-wifi-pick" className="font-semibold block mb-1">আমার WiFi বাছুন</label>
-        <select id="my-wifi-pick" value={pickedId} onChange={(e) => pick(e.target.value)} className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-base font-semibold">
-          <option value="">— WiFi বাছুন —</option>
-          {wifiList.map((c) => (<option key={c.id} value={c.id}>{c.wifiName} — {c.name}</option>))}
-        </select>
-        {wifiList.length === 0 && (
-          <p className="text-sm text-[var(--dim)] mt-2">
-            কোনো কাস্টমারের WiFi নাম দেওয়া হয়নি। কাস্টমার যোগ বা বদল করার সময় WiFi নাম আর পাসওয়ার্ড লিখলে এখানে দেখাবে।
-          </p>
-        )}
-      </section>
-
-      {picked && (
-        <section className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-4" aria-label="WiFi তথ্য">
-          <p className="text-lg font-bold">{picked.wifiName}</p>
-          <p className="text-sm text-[var(--dim)] mt-0.5">
-            {picked.name}
-            {picked.gram ? ` • গ্রাম: ${picked.gram}` : ""}
-            {picked.para ? ` • পাড়া: ${picked.para}` : ""}
-          </p>
-          <p className="mt-3">
-            পাসওয়ার্ড: <strong>{showPass ? (picked.wifiPassword || "(দেওয়া হয়নি)") : "••••••••"}</strong>
-          </p>
-          <div className="flex gap-2 flex-wrap mt-2">
-            <button onClick={() => setShowPass((v) => !v)} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">
-              {showPass ? "🙈 লুকান" : "👁 দেখুন"}
-            </button>
-            {picked.wifiPassword && (
-              <button onClick={() => void copyPass()} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">
-                {copied ? "✓ কপি হয়েছে" : "📋 কপি করুন"}
-              </button>
-            )}
-          </div>
-          {(picked.routerBrand || picked.routerModel) && <p className="mt-2">রাউটার: {[picked.routerBrand, picked.routerModel].filter(Boolean).join(" ")}</p>}
-          {picked.routerIp && <p>রাউটার IP: {picked.routerIp}</p>}
-          {picked.routerAdminUser && <p className="mt-2">অ্যাডমিন ইউজারনেম: <strong>{picked.routerAdminUser}</strong></p>}
-          {picked.routerAdminPass && (
-            <>
-              <p className="mt-1">অ্যাডমিন পাসওয়ার্ড: <strong>{showAdminPass ? picked.routerAdminPass : "••••••••"}</strong></p>
-              <div className="flex gap-2 flex-wrap mt-2">
-                <button onClick={() => setShowAdminPass((v) => !v)} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">
-                  {showAdminPass ? "🙈 লুকান" : "👁 দেখুন"}
-                </button>
-                <button onClick={() => void copyAdminPass()} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">
-                  {copiedAdmin ? "✓ কপি হয়েছে" : "📋 কপি করুন"}
-                </button>
-              </div>
-              <p className="text-xs text-[var(--dim)] mt-1">রাউটারের পাতা খুললে এই ইউজারনেম-পাসওয়ার্ড দিয়ে লগইন করুন।</p>
-            </>
-          )}
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
-            {routerUrl(picked.routerIp) && (
-              <a href={routerUrl(picked.routerIp) ?? undefined} target="_blank" rel="noreferrer" aria-label={`${picked.name} এর রাউটারে ঢুকুন`} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">🔧 রাউটারে ঢুকুন</a>
-            )}
-            <LineToggle status={picked.lineStatus} customerId={picked.id} />
-            <button onClick={() => onOpenCustomer(picked.id)} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">কার্ড দেখুন</button>
-          </div>
-          <p className="text-xs text-[var(--dim)] mt-2">
-            WiFi বন্ধ/চালু করতে "রাউটারে ঢুকুন" চেপে রাউটারের নিজের পাতায় ঢুকতে হবে — রাউটারের অ্যাডমিন পাসওয়ার্ড লাগবে। সাবধান: তুমি যে WiFi-তে আছো, সেটা বন্ধ করলে ফোনের সংযোগ চলে যাবে, আবার চালাতে রাউটারের কাছে যেতে হবে। লাইন চালু/বন্ধ এখানে শুধু খাতার হিসাব বদলায়।
-          </p>
-        </section>
-      )}
-
-      <section className="rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-4" aria-label="ফোনের WiFi বন্ধ বা চালু">
-        <p className="font-bold">ফোনের WiFi বন্ধ / চালু</p>
-        <p className="text-sm text-[var(--dim)] mt-1">
-          অ্যাপের ভেতর থেকে ফোনের WiFi বন্ধ/চালু করা যায় না — ফোন দেয় না। নিচের বাটনে ফোনের WiFi সেটিংস খুলবে, সেখানে সুইচ চাপলেই হবে।
-        </p>
-        <button
-          onClick={() => { window.location.href = "intent://#Intent;action=android.settings.WIFI_SETTINGS;end"; }}
-          className="rounded-xl bg-[var(--accent)] text-white font-bold px-4 py-3 mt-3"
-        >
-          📶 WiFi সেটিংস খুলুন
-        </button>
-        <p className="text-xs text-[var(--dim)] mt-2">
-          না খুললে ফোনের উপর থেকে নিচে টেনে Quick Settings থেকে WiFi বোতাম চাপো।
-        </p>
-      </section>
-    </div>
   );
 }
 
@@ -800,7 +624,6 @@ function RoutersTab({ views, onOpenCustomer }: {
                 {[c.routerBrand, c.routerModel].filter(Boolean).join(" ") || "রাউটারের মডেল দেওয়া হয়নি"}
                 {c.routerIp ? ` • IP: ${c.routerIp}` : ""}
                 {c.pppoeUser ? ` • PPPoE: ${c.pppoeUser}` : ""}
-                {c.routerAdminUser ? ` • অ্যাডমিন: ${c.routerAdminUser}` : ""}
                 {c.onuInfo ? ` • ONU: ${c.onuInfo}` : ""}
               </span>
             </button>
@@ -878,13 +701,12 @@ function CustomerCardPage({ customer, payments, today, onBack, onEdit }: {
                 </div>
                 <LineToggle status={c.lineStatus} customerId={c.id} large />
               </div>
-              {(c.routerBrand || c.wifiName || c.routerIp || c.routerAdminUser) && (
+              {(c.routerBrand || c.wifiName || c.routerIp) && (
                 <div className="mt-4 pt-4 border-t border-[var(--border)] text-base space-y-1">
                   <p className="font-bold">📶 রাউটারের তথ্য</p>
                   {c.wifiName && <p>WiFi নাম: <strong>{c.wifiName}</strong>{c.wifiPassword ? ` • পাসওয়ার্ড: ${c.wifiPassword}` : ""}</p>}
                   {(c.routerBrand || c.routerModel) && <p>রাউটার: {[c.routerBrand, c.routerModel].filter(Boolean).join(" ")}</p>}
                   {c.routerIp && <p>রাউটার IP: {c.routerIp}</p>}
-                  {c.routerAdminUser && <p>অ্যাডমিন ইউজারনেম: {c.routerAdminUser}{c.routerAdminPass ? ` • পাসওয়ার্ড: ${c.routerAdminPass}` : ""}</p>}
                   {c.pppoeUser && <p>PPPoE ইউজার: {c.pppoeUser}{c.pppoePass ? ` • পাসওয়ার্ড: ${c.pppoePass}` : ""}</p>}
                   {c.onuInfo && <p>ONU: {c.onuInfo}</p>}
                   {routerUrl(c.routerIp) && (
@@ -987,8 +809,6 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
   const [routerIp, setRouterIp] = useState(initial?.routerIp ?? "192.168.0.1");
   const [wifiName, setWifiName] = useState(initial?.wifiName ?? "");
   const [wifiPassword, setWifiPassword] = useState(initial?.wifiPassword ?? "");
-  const [routerAdminUser, setRouterAdminUser] = useState(initial?.routerAdminUser ?? "");
-  const [routerAdminPass, setRouterAdminPass] = useState(initial?.routerAdminPass ?? "");
   const [pppoeUser, setPppoeUser] = useState(initial?.pppoeUser ?? "");
   const [pppoePass, setPppoePass] = useState(initial?.pppoePass ?? "");
   const [onuInfo, setOnuInfo] = useState(initial?.onuInfo ?? "");
@@ -1009,8 +829,7 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
       name: name.trim(), mobile: mobile.trim(), address: address.trim(), gram: gram.trim(), para: para.trim(), packageName: packageName.trim(),
       connectionDate: connectionDate || today,
       routerBrand: routerBrand.trim(), routerModel: routerModel.trim(), routerIp: routerIp.trim(),
-      wifiName: wifiName.trim(), wifiPassword: wifiPassword.trim(), routerAdminUser: routerAdminUser.trim(),
-      routerAdminPass: routerAdminPass.trim(), pppoeUser: pppoeUser.trim(),
+      wifiName: wifiName.trim(), wifiPassword: wifiPassword.trim(), pppoeUser: pppoeUser.trim(),
       pppoePass: pppoePass.trim(), onuInfo: onuInfo.trim(), notes: notes.trim(),
     };
     try {
@@ -1111,14 +930,6 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
               <div>
                 <label htmlFor="f-pppoepass" className="font-semibold block mb-1">PPPoE পাসওয়ার্ড</label>
                 <input id="f-pppoepass" value={pppoePass} onChange={(e) => setPppoePass(e.target.value)} className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="f-adminuser" className="font-semibold block mb-1">রাউটার অ্যাডমিন ইউজারনেম</label>
-                <input id="f-adminuser" value={routerAdminUser} onChange={(e) => setRouterAdminUser(e.target.value)} placeholder="যেমন: admin" className={inputCls} />
-              </div>
-              <div>
-                <label htmlFor="f-adminpass" className="font-semibold block mb-1">রাউটার অ্যাডমিন পাসওয়ার্ড</label>
-                <input id="f-adminpass" value={routerAdminPass} onChange={(e) => setRouterAdminPass(e.target.value)} className={inputCls} />
               </div>
             </div>
             <div>

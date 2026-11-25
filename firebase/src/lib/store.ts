@@ -36,8 +36,6 @@ export interface Customer {
   routerIp: string;
   wifiName: string;
   wifiPassword: string;
-  routerAdminUser: string;
-  routerAdminPass: string;
   pppoeUser: string;
   pppoePass: string;
   onuInfo: string;
@@ -70,8 +68,6 @@ export interface CustomerInput {
   routerIp: string;
   wifiName: string;
   wifiPassword: string;
-  routerAdminUser: string;
-  routerAdminPass: string;
   pppoeUser: string;
   pppoePass: string;
   onuInfo: string;
@@ -98,8 +94,6 @@ function toCustomer(id: string, data: Record<string, unknown>): Customer {
     routerIp: s(data.routerIp),
     wifiName: s(data.wifiName),
     wifiPassword: s(data.wifiPassword),
-    routerAdminUser: s(data.routerAdminUser),
-    routerAdminPass: s(data.routerAdminPass),
     pppoeUser: s(data.pppoeUser),
     pppoePass: s(data.pppoePass),
     onuInfo: s(data.onuInfo),
