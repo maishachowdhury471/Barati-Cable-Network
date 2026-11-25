@@ -373,6 +373,8 @@ function MyWifiTab({ views, onOpenCustomer }: {
   const picked = wifiList.find((c) => c.id === pickedId) ?? null;
   const [showPass, setShowPass] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showAdminPass, setShowAdminPass] = useState(false);
+  const [copiedAdmin, setCopiedAdmin] = useState(false);
 
   useEffect(() => {
     if (pickedId && !wifiList.some((c) => c.id === pickedId)) setPickedId("");
@@ -382,8 +384,19 @@ function MyWifiTab({ views, onOpenCustomer }: {
     setPickedId(id);
     setShowPass(false);
     setCopied(false);
+    setShowAdminPass(false);
+    setCopiedAdmin(false);
     if (id) localStorage.setItem("bcn-my-wifi-id", id);
     else localStorage.removeItem("bcn-my-wifi-id");
+  };
+
+  const copyAdminPass = async () => {
+    if (!picked?.routerAdminPass) return;
+    try {
+      await navigator.clipboard.writeText(picked.routerAdminPass);
+      setCopiedAdmin(true);
+      setTimeout(() => setCopiedAdmin(false), 2000);
+    } catch { /* ক্লিপবোর্ড না থাকলে কিছু করার নেই */ }
   };
 
   const copyPass = async () => {
@@ -453,6 +466,21 @@ function MyWifiTab({ views, onOpenCustomer }: {
           </div>
           {(picked.routerBrand || picked.routerModel) && <p className="mt-2">রাউটার: {[picked.routerBrand, picked.routerModel].filter(Boolean).join(" ")}</p>}
           {picked.routerIp && <p>রাউটার IP: {picked.routerIp}</p>}
+          {picked.routerAdminUser && <p className="mt-2">অ্যাডমিন ইউজারনেম: <strong>{picked.routerAdminUser}</strong></p>}
+          {picked.routerAdminPass && (
+            <>
+              <p className="mt-1">অ্যাডমিন পাসওয়ার্ড: <strong>{showAdminPass ? picked.routerAdminPass : "••••••••"}</strong></p>
+              <div className="flex gap-2 flex-wrap mt-2">
+                <button onClick={() => setShowAdminPass((v) => !v)} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">
+                  {showAdminPass ? "🙈 লুকান" : "👁 দেখুন"}
+                </button>
+                <button onClick={() => void copyAdminPass()} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">
+                  {copiedAdmin ? "✓ কপি হয়েছে" : "📋 কপি করুন"}
+                </button>
+              </div>
+              <p className="text-xs text-[var(--dim)] mt-1">রাউটারের পাতা খুললে এই ইউজারনেম-পাসওয়ার্ড দিয়ে লগইন করুন।</p>
+            </>
+          )}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             {routerUrl(picked.routerIp) && (
               <a href={routerUrl(picked.routerIp) ?? undefined} target="_blank" rel="noreferrer" aria-label={`${picked.name} এর রাউটারে ঢুকুন`} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">🔧 রাউটারে ঢুকুন</a>
@@ -772,6 +800,7 @@ function RoutersTab({ views, onOpenCustomer }: {
                 {[c.routerBrand, c.routerModel].filter(Boolean).join(" ") || "রাউটারের মডেল দেওয়া হয়নি"}
                 {c.routerIp ? ` • IP: ${c.routerIp}` : ""}
                 {c.pppoeUser ? ` • PPPoE: ${c.pppoeUser}` : ""}
+                {c.routerAdminUser ? ` • অ্যাডমিন: ${c.routerAdminUser}` : ""}
                 {c.onuInfo ? ` • ONU: ${c.onuInfo}` : ""}
               </span>
             </button>
@@ -849,12 +878,13 @@ function CustomerCardPage({ customer, payments, today, onBack, onEdit }: {
                 </div>
                 <LineToggle status={c.lineStatus} customerId={c.id} large />
               </div>
-              {(c.routerBrand || c.wifiName || c.routerIp) && (
+              {(c.routerBrand || c.wifiName || c.routerIp || c.routerAdminUser) && (
                 <div className="mt-4 pt-4 border-t border-[var(--border)] text-base space-y-1">
                   <p className="font-bold">📶 রাউটারের তথ্য</p>
                   {c.wifiName && <p>WiFi নাম: <strong>{c.wifiName}</strong>{c.wifiPassword ? ` • পাসওয়ার্ড: ${c.wifiPassword}` : ""}</p>}
                   {(c.routerBrand || c.routerModel) && <p>রাউটার: {[c.routerBrand, c.routerModel].filter(Boolean).join(" ")}</p>}
                   {c.routerIp && <p>রাউটার IP: {c.routerIp}</p>}
+                  {c.routerAdminUser && <p>অ্যাডমিন ইউজারনেম: {c.routerAdminUser}{c.routerAdminPass ? ` • পাসওয়ার্ড: ${c.routerAdminPass}` : ""}</p>}
                   {c.pppoeUser && <p>PPPoE ইউজার: {c.pppoeUser}{c.pppoePass ? ` • পাসওয়ার্ড: ${c.pppoePass}` : ""}</p>}
                   {c.onuInfo && <p>ONU: {c.onuInfo}</p>}
                   {routerUrl(c.routerIp) && (
@@ -957,6 +987,8 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
   const [routerIp, setRouterIp] = useState(initial?.routerIp ?? "192.168.0.1");
   const [wifiName, setWifiName] = useState(initial?.wifiName ?? "");
   const [wifiPassword, setWifiPassword] = useState(initial?.wifiPassword ?? "");
+  const [routerAdminUser, setRouterAdminUser] = useState(initial?.routerAdminUser ?? "");
+  const [routerAdminPass, setRouterAdminPass] = useState(initial?.routerAdminPass ?? "");
   const [pppoeUser, setPppoeUser] = useState(initial?.pppoeUser ?? "");
   const [pppoePass, setPppoePass] = useState(initial?.pppoePass ?? "");
   const [onuInfo, setOnuInfo] = useState(initial?.onuInfo ?? "");
@@ -977,7 +1009,8 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
       name: name.trim(), mobile: mobile.trim(), address: address.trim(), gram: gram.trim(), para: para.trim(), packageName: packageName.trim(),
       connectionDate: connectionDate || today,
       routerBrand: routerBrand.trim(), routerModel: routerModel.trim(), routerIp: routerIp.trim(),
-      wifiName: wifiName.trim(), wifiPassword: wifiPassword.trim(), pppoeUser: pppoeUser.trim(),
+      wifiName: wifiName.trim(), wifiPassword: wifiPassword.trim(), routerAdminUser: routerAdminUser.trim(),
+      routerAdminPass: routerAdminPass.trim(), pppoeUser: pppoeUser.trim(),
       pppoePass: pppoePass.trim(), onuInfo: onuInfo.trim(), notes: notes.trim(),
     };
     try {
@@ -1078,6 +1111,14 @@ function CustomerForm({ initial, today, onClose, onSaved }: {
               <div>
                 <label htmlFor="f-pppoepass" className="font-semibold block mb-1">PPPoE পাসওয়ার্ড</label>
                 <input id="f-pppoepass" value={pppoePass} onChange={(e) => setPppoePass(e.target.value)} className={inputCls} />
+              </div>
+              <div>
+                <label htmlFor="f-adminuser" className="font-semibold block mb-1">রাউটার অ্যাডমিন ইউজারনেম</label>
+                <input id="f-adminuser" value={routerAdminUser} onChange={(e) => setRouterAdminUser(e.target.value)} placeholder="যেমন: admin" className={inputCls} />
+              </div>
+              <div>
+                <label htmlFor="f-adminpass" className="font-semibold block mb-1">রাউটার অ্যাডমিন পাসওয়ার্ড</label>
+                <input id="f-adminpass" value={routerAdminPass} onChange={(e) => setRouterAdminPass(e.target.value)} className={inputCls} />
               </div>
             </div>
             <div>
