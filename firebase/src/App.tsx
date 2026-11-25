@@ -451,7 +451,8 @@ function MyWifiTab({ views, onOpenCustomer }: {
               </button>
             )}
           </div>
-          {picked.routerIp && <p className="mt-2">রাউটার IP: {picked.routerIp}</p>}
+          {(picked.routerBrand || picked.routerModel) && <p className="mt-2">রাউটার: {[picked.routerBrand, picked.routerModel].filter(Boolean).join(" ")}</p>}
+          {picked.routerIp && <p>রাউটার IP: {picked.routerIp}</p>}
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             {routerUrl(picked.routerIp) && (
               <a href={routerUrl(picked.routerIp) ?? undefined} target="_blank" rel="noreferrer" aria-label={`${picked.name} এর রাউটারে ঢুকুন`} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">🔧 রাউটারে ঢুকুন</a>
@@ -460,7 +461,7 @@ function MyWifiTab({ views, onOpenCustomer }: {
             <button onClick={() => onOpenCustomer(picked.id)} className="rounded-xl bg-[var(--surface2)] border border-[var(--border)] font-bold px-4 py-2">কার্ড দেখুন</button>
           </div>
           <p className="text-xs text-[var(--dim)] mt-2">
-            লাইন চালু/বন্ধ এখানে শুধু খাতার হিসাব বদলায় — রাউটার থেকে সত্যি বন্ধ করতে রাউটারের ভেতরে যেতে হয়।
+            WiFi বন্ধ/চালু করতে "রাউটারে ঢুকুন" চেপে রাউটারের নিজের পাতায় ঢুকতে হবে — রাউটারের অ্যাডমিন পাসওয়ার্ড লাগবে। সাবধান: তুমি যে WiFi-তে আছো, সেটা বন্ধ করলে ফোনের সংযোগ চলে যাবে, আবার চালাতে রাউটারের কাছে যেতে হবে। লাইন চালু/বন্ধ এখানে শুধু খাতার হিসাব বদলায়।
           </p>
         </section>
       )}
